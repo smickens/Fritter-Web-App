@@ -2,6 +2,12 @@ import type {Request, Response} from 'express';
 import express from 'express';
 import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
+import FollowCollection from '../follow/collection';
+import BookmarkCollection from '../bookmark/collection';
+import PersonaCollection from '../persona/collection';
+import LikeCollection from '../like/collection';
+import TagCollection from '../tag/collection';
+import { Bookmark } from '../bookmark/model';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
 
@@ -9,7 +15,6 @@ const router = express.Router();
 
 /**
  * Get the signed in user
- * TODO: may need better route and documentation
  * (so students don't accidentally delete this when copying over)
  *
  * @name GET /api/users/session
@@ -160,8 +165,20 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    await UserCollection.deleteOne(userId);
+    
     await FreetCollection.deleteMany(userId);
+    await FollowCollection.deleteMany(userId);
+
+    const bookmarksByUser = await BookmarkCollection.findAllByUser(userId);
+    bookmarksByUser.forEach(async (bookmark: Bookmark) => {
+      await TagCollection.deleteMany(bookmark._id);
+    });
+    await BookmarkCollection.deleteManyByUserId(userId);
+
+    await PersonaCollection.deleteMany(userId);
+    await LikeCollection.deleteMany(userId);
+    await UserCollection.deleteOne(userId);
+
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'
