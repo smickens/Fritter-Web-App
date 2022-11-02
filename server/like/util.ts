@@ -6,7 +6,8 @@ import UserCollection from '../user/collection';
 // Update this if you add a property to the User type!
 type LikeResponse = {
   _id: string;
-  userId: Types.ObjectId;
+  userId: Object;
+  // username: string
 };
 
 /**

@@ -28,7 +28,12 @@ class FreetCollection {
       dateModified: date
     });
     await freet.save(); // Saves freet to MongoDB
-    return (await freet.populate('authorId')).populate('numLikes');
+    return (await freet.populate('authorId')).populate({
+      path: 'likedBy',
+      populate: {
+        path: 'userId'
+      }
+    });
   }
 
   /**
@@ -40,7 +45,12 @@ class FreetCollection {
   static async findOne(freetId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
     return FreetModel.findOne({_id: freetId})
               .populate('authorId')
-              .populate('numLikes')
+              .populate({
+                path: 'likedBy',
+                populate: {
+                  path: 'userId'
+                }
+              })
               .exec();
   }
 
@@ -53,7 +63,12 @@ class FreetCollection {
     // Retrieves freets and sorts them from most to least recent
     return FreetModel.find({}).sort({dateModified: -1})
               .populate('authorId')
-              .populate('numLikes')
+              .populate({
+                path: 'likedBy',
+                populate: {
+                  path: 'userId'
+                }
+              })
               .exec();
   }
 
@@ -67,7 +82,12 @@ class FreetCollection {
     const author = await UserCollection.findOneByUsername(username);
     return FreetModel.find({authorId: author._id}).sort({dateModified: -1})
               .populate('authorId')
-              .populate('numLikes')
+              .populate({
+                path: 'likedBy',
+                populate: {
+                  path: 'userId'
+                }
+              })
               .exec();
   }
 
@@ -83,7 +103,12 @@ class FreetCollection {
     freet.content = content;
     freet.dateModified = new Date();
     await freet.save();
-    return (await freet.populate('authorId')).populate('numLikes');
+    return (await freet.populate('authorId')).populate({
+      path: 'likedBy',
+      populate: {
+        path: 'userId'
+      }
+    });
   }
 
   /**

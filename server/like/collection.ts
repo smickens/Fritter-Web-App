@@ -17,7 +17,7 @@ import LikeModel from './model';
     static async addOne(userId: Types.ObjectId | string, freetId: Types.ObjectId | string): Promise<HydratedDocument<Like>> {  
       const like = new LikeModel({userId: userId, freetId: freetId});
       await like.save(); // Saves like to MongoDB
-      return like.populate('userId', 'freetId');
+      return like.populate('userId');
     }
   
     /**
@@ -39,7 +39,7 @@ import LikeModel from './model';
      * @return {Promise<HydratedDocument<Like>> | Promise<null>} - The like with the given freetId, if any
      */
     static async findOne(userId: Types.ObjectId | string, freetId: Types.ObjectId | string): Promise<HydratedDocument<Like>> {
-        return LikeModel.findOne({userId: userId, freetId: freetId});
+        return LikeModel.findOne({userId: userId, freetId: freetId}).populate('userId');
     }
 
     /**

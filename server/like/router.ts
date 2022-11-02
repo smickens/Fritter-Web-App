@@ -31,7 +31,7 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const like = await LikeCollection.addOne(userId, req.body.id);
+    const like = await LikeCollection.addOne(userId, req.body.freetId);
 
     res.status(200).json({
       message: 'Your like was added successfully',

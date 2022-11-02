@@ -52,6 +52,26 @@
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
     </p>
+    <p>
+      {{ freet.likedBy.length }} {{ freet.likedBy.length == 1 ? 'Like' : 'Likes' }} by ({{ freet.likedBy.join(', ') }})
+    </p>
+    <div
+      v-if="$store.state.username"
+      class="actions"
+    >
+      <button
+        v-if="isLikedByLoggedInUser"
+        @click="unlikeFreet"
+      >
+        &#10084; Unlike
+      </button>
+      <button
+        v-else
+        @click="likeFreet"
+      >
+        &#9825; Like
+      </button>
+    </div>
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -72,7 +92,14 @@ export default {
     freet: {
       type: Object,
       required: true
-    }
+    },
+    // TODO: do we want this?, is there a better way to know if user liked this freet?
+    // * could add virtual property on freet to have likedBy
+    // ?? Data if current user liked this freet
+    // like: {
+    //   type: Object,
+    //   required: false
+    // }
   },
   data() {
     return {
@@ -108,7 +135,36 @@ export default {
           });
         }
       };
-      this.request(params);
+      this.request(`freets/${this.freet._id}`, params);
+    },
+    likeFreet() {
+      /**
+       * Likes this freet.
+       */
+      const params = {
+        method: 'POST',
+        message: 'Successfully liked freet!',
+        body: JSON.stringify({freetId: this.freet._id}),
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(`likes/`, params);
+    },
+    unlikeFreet() {
+      /**
+       * Unlikes this freet.
+       */
+      const params = {
+        method: 'DELETE',
+        message: 'Successfully unliked freet!',
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(`likes/${this.freet._id}`, params);
     },
     submitEdit() {
       /**
@@ -130,9 +186,9 @@ export default {
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(params);
+      this.request(`freets/${this.freet._id}`, params);
     },
-    async request(params) {
+    async request(path, params) {
       /**
        * Submits a request to the freet's endpoint
        * @param params - Options for the request
@@ -147,7 +203,7 @@ export default {
       }
 
       try {
-        const r = await fetch(`/api/freets/${this.freet._id}`, options);
+        const r = await fetch(`/api/${path}`, options);
         if (!r.ok) {
           const res = await r.json();
           throw new Error(res.error);
@@ -161,6 +217,11 @@ export default {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
+    }
+  },
+  computed: {
+    isLikedByLoggedInUser() {
+      return this.freet.likedBy.includes(this.$store.state.username);
     }
   }
 };

@@ -1,6 +1,7 @@
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
+import { Like } from '../like/model';
 
 /**
  * This file defines the properties stored in a Freet
@@ -14,7 +15,7 @@ export type Freet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
-  numLikes?: Number;
+  // likedBy?: Number;
 };
 
 export type PopulatedFreet = {
@@ -23,7 +24,7 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
-  numLikes?: Number;
+  likedBy: [Like];
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -57,11 +58,10 @@ const FreetSchema = new Schema<Freet>({
   toObject: { virtuals: true }
 });
 
-FreetSchema.virtual('numLikes', {
+FreetSchema.virtual('likedBy', {
   ref: 'Like',
   localField: '_id',
   foreignField: 'freetId',
-  count: true // don't need the like data, just want to know how many likes for a freet
 });
 
 const FreetModel = model<Freet>('Freet', FreetSchema);
