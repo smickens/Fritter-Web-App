@@ -7,7 +7,6 @@ import UserCollection from '../user/collection';
 type LikeResponse = {
   _id: string;
   userId: Object;
-  // username: string
 };
 
 /**

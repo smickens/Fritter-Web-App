@@ -4,12 +4,12 @@ import BookmarkCollection from './collection';
 import FreetCollection from '../freet/collection';
 
 const isBookmarkExists = async (req: Request, res: Response, next: NextFunction) => {
-  const validFormat = Types.ObjectId.isValid(req.params.bookmarkId);
-  const bookmark = validFormat ? await BookmarkCollection.findOne(req.params.bookmarkId) : '';
+  const validFormat = Types.ObjectId.isValid(req.params.freetId);
+  const bookmark = validFormat ? await BookmarkCollection.findOne(req.session.userId, req.params.freetId) : '';
   if (!bookmark) {
     res.status(404).json({
       error: {
-        bookmarkNotFound: `Bookmark with bookmark ID ${req.params.bookmarkId} does not exist.`
+        bookmarkNotFound: `Bookmark with for freet ${req.params.freetId} does not exist.`
       }
     });
     return;
@@ -21,7 +21,7 @@ const isBookmarkExists = async (req: Request, res: Response, next: NextFunction)
 const isFreetNotBookmarked = async (req: Request, res: Response, next: NextFunction) => {
   const userBookmarkedFreets = await BookmarkCollection.findAllByUser(req.session.userId);
   const userBookmarkedFreetIds = userBookmarkedFreets.map(bookmark => { return bookmark.freetId._id.toString() });
-  if (userBookmarkedFreetIds.includes(req.body.id)) {
+  if (userBookmarkedFreetIds.includes(req.body.freetId)) {
     res.status(403).json({
       error: 'Cannot bookmark freet that is already bookmarked by you.'
     });
@@ -32,25 +32,13 @@ const isFreetNotBookmarked = async (req: Request, res: Response, next: NextFunct
 };
 
  const isFreetExists = async (req: Request, res: Response, next: NextFunction) => {
-  const validFormat = Types.ObjectId.isValid(req.body.id);
-  const freet = validFormat ? await FreetCollection.findOne(req.body.id) : '';
+  const validFormat = Types.ObjectId.isValid(req.body.freetId);
+  const freet = validFormat ? await FreetCollection.findOne(req.body.freetId) : '';
   if (!freet) {
     res.status(404).json({
       error: {
-        freetNotFound: `Freet with freet ID ${req.body.id} does not exist.`
+        freetNotFound: `Freet with freet ID ${req.body.freetId} does not exist.`
       }
-    });
-    return;
-  }
-
-  next();
-};
-
- const isBookmarkCreator = async (req: Request, res: Response, next: NextFunction) => {
-  const bookmark = await BookmarkCollection.findOne(req.params.bookmarkId);
-  if (req.session.userId !== bookmark.userId.toString()) {
-    res.status(403).json({
-      error: 'Cannot read/modify another users\' bookmark.'
     });
     return;
   }
@@ -75,6 +63,5 @@ export {
   isBookmarkExists,
   isFreetNotBookmarked,
   isFreetExists,
-  isBookmarkCreator,
   isValidTag
 };

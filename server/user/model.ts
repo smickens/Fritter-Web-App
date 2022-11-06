@@ -1,6 +1,6 @@
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
-// import { Bookmark } from 'bookmark/model';
+import { Bookmark } from '../bookmark/model';
 
 /**
  * This file defines the properties stored in a User
@@ -13,7 +13,7 @@ export type User = {
   username: string;
   password: string;
   dateJoined: Date;
-  // bookmarks: [Bookmark]
+  bookmarks: [Bookmark]
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -35,6 +35,9 @@ const UserSchema = new Schema({
     type: Date,
     required: true
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 UserSchema.virtual('bookmarks', {

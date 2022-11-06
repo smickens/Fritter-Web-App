@@ -28,14 +28,23 @@ class BookmarkCollection {
   }
 
   /**
-   * Find a bookmark by bookmarkId
+   * Find a bookmark by userId and freetId
    *
-   * @param {string} bookmarkId - The id of the bookmark to find
+   * @param {string} userId - The id of the user
+   * @param {string} freetId - The id of the freet
    * @return {Promise<HydratedDocument<Bookmark>> | Promise<null> } - The bookmark with the given bookmarkId, if any
    */
-   static async findOne(bookmarkId: Types.ObjectId | string): Promise<HydratedDocument<Bookmark>> {
-    return BookmarkModel.findOne({_id: bookmarkId})
-              .populate('freetId')
+   static async findOne(userId: Types.ObjectId | string, freetId: Types.ObjectId | string): Promise<HydratedDocument<Bookmark>> {
+    return BookmarkModel.findOne({userId: userId, freetId: freetId})
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'likedBy',
+                  populate: {
+                    path: 'userId'
+                  }
+                }
+              })
               .populate('tags')
               .exec();
   }
@@ -48,7 +57,15 @@ class BookmarkCollection {
    */
   static async findAllByUser(userId: Types.ObjectId | string): Promise<Array<HydratedDocument<Bookmark>>> {
     return BookmarkModel.find({userId: userId}).sort({dateCreated: -1})
-              .populate('freetId')
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'likedBy',
+                  populate: {
+                    path: 'userId'
+                  }
+                }
+              })
               .populate('tags')
               .exec();
   }
@@ -68,13 +85,14 @@ class BookmarkCollection {
   }
 
   /**
-   * Delete a bookmark with id bookmarkId
+   * Delete a bookmark for user with id for freet with freetId
    *
-   * @param {string} bookmarkId - The id of bookmark to delete
+   * @param {string} userId - The userId of the user
+   * @param {string} freetId - The freet id to delete bookmark for
    * @return {Promise<Boolean>} - true if the bookmark has been deleted, false otherwise
    */
-  static async deleteOne(bookmarkId: Types.ObjectId | string): Promise<boolean> {
-    const bookmark = await BookmarkModel.deleteOne({_id: bookmarkId});
+  static async deleteOne(userId: Types.ObjectId | string, freetId: Types.ObjectId | string): Promise<boolean> {
+    const bookmark = await BookmarkModel.deleteOne({userId: userId, freetId: freetId});
     return bookmark !== null;
   }
 

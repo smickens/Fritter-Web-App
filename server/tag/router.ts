@@ -1,6 +1,7 @@
 import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
 import TagCollection from './collection';
+import BookmarkCollection from '../bookmark/collection';
 import * as tagValidator from './middleware';
 import * as userValidator from '../user/middleware';
 import * as bookmarkValidator from '../bookmark/middleware';
@@ -9,23 +10,23 @@ import * as util from './util';
 const router = express.Router();
 
 /**
- * Get all the tags for bookmark with bookmarkId
+ * Get all the tags for bookmark for freetId
  *
- * @name GET /api/bookmarks/:bookmarkId/tag
+ * @name GET /api/bookmarks/:freetId/tag
  *
  * @return {TagResponse[]} - A list of all the bookmarks sorted in descending order by date created
  * @throws {403} - If user is not logged in
  * @throws {404} - If the bookmarkId is not valid
  */
 router.get(
-  '/:bookmarkId/tags',
+  '/:freetId/tags',
   [
     userValidator.isUserLoggedIn,
-    bookmarkValidator.isBookmarkExists,
-    bookmarkValidator.isBookmarkCreator
+    bookmarkValidator.isBookmarkExists
   ],
   async (req: Request, res: Response, next: NextFunction) => {
-    const bookmarkTags = await TagCollection.findAllByBookmark(req.params.bookmarkId);
+    const bookmark = await BookmarkCollection.findOne(req.session.userId, req.params.freetId);
+    const bookmarkTags = await TagCollection.findAllByBookmark(bookmark._id);
     const response = bookmarkTags.map(util.constructTagResponse);
     res.status(200).json(response);
   } 
@@ -34,7 +35,7 @@ router.get(
 /**
  * Add a tag to a bookmark
  *
- * @name POST /api/bookmarks/:bookmarkId/tags
+ * @name POST /api/bookmarks/:freetId/tags
  *
  * @param {string} tag - the new tag for the bookmark
  * @return {BookmarkResponse} - the updated bookmark
@@ -48,12 +49,12 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     bookmarkValidator.isBookmarkExists,
-    bookmarkValidator.isBookmarkCreator,
     tagValidator.isValidTag,
     tagValidator.notContainsTag
   ],
   async (req: Request, res: Response) => {
-    const tag = await TagCollection.addOne(req.params.bookmarkId, req.body.tag);
+    const bookmark = await BookmarkCollection.findOne(req.session.userId, req.params.freetId);
+    const tag = await TagCollection.addOne(bookmark._id, req.body.tag);
 
     res.status(201).json({
       message: 'Your tag was created successfully.',
@@ -74,18 +75,18 @@ router.post(
  * @throws {403} - If tag is not currently a tag associated with the bookmark
  */
  router.delete(
-    '/:bookmarkId/tags/:tag',
+    '/:freetId/tags/:tag',
     [
       userValidator.isUserLoggedIn,
       bookmarkValidator.isBookmarkExists,
-      bookmarkValidator.isBookmarkCreator,
       tagValidator.containsTag
     ],
     async (req: Request, res: Response) => {
-        await TagCollection.deleteOne(req.params.bookmarkId, req.params.tag);
-        res.status(200).json({
-        message: 'Your tag was deleted successfully.'
-        });
+      const bookmark = await BookmarkCollection.findOne(req.session.userId, req.params.freetId);
+      await TagCollection.deleteOne(bookmark._id, req.params.tag);
+      res.status(200).json({
+      message: 'Your tag was deleted successfully.'
+      });
     }
   );
 

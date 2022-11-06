@@ -28,7 +28,7 @@ class TagCollection {
    * Find a bookmark with bookmarkId with tag name
    *
    * @param {string} bookmarkId - The id of the bookmark to find
-   * @param {string} bookmarkId - The tag name to find
+   * @param {string} tagName - The tag name to find
    * @return {Promise<HydratedDocument<Tag>> | Promise<null> } - The bookmark with the given bookmarkId, if any
    */
    static async findOne(bookmarkId: Types.ObjectId | string, tagName: string): Promise<HydratedDocument<Tag>> {

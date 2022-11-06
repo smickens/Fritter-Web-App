@@ -5,14 +5,23 @@ import createPersistedState from 'vuex-persistedstate';
 Vue.use(Vuex);
 
 /**
- * Storage for data that needs to be accessed from various compoentns.
+ * Storage for data that needs to be accessed from various components.
  */
 const store = new Vuex.Store({
   state: {
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
+    user: null,
+    bookmarks: [],
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
+  },
+  getters: {
+    bookmarkFreetIds(state) {
+      return state.bookmarks.map(bookmark => {
+        return bookmark.freetId._id
+      })
+    },
   },
   mutations: {
     alert(state, payload) {
@@ -23,6 +32,13 @@ const store = new Vuex.Store({
       setTimeout(() => {
         Vue.delete(state.alerts, payload.message);
       }, 3000);
+    },
+    setUser(state, user) {
+      /**
+       * Update the stored user to the specified one.
+       * @param user - new object to set
+       */
+      state.user = user;
     },
     setUsername(state, username) {
       /**
@@ -52,6 +68,13 @@ const store = new Vuex.Store({
       const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
+    },
+    async refreshBookmarks(state) {
+      /**
+       * Request the server for the current user's bookmarks.
+       */
+      const res = await fetch('/api/bookmarks').then(async r => r.json());
+      state.bookmarks = res;
     }
   },
   // Store data across page refreshes, only discard on browser close

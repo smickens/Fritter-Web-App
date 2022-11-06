@@ -1,18 +1,18 @@
 <template>
   <div id="app">
-    <header>
-      <NavBar />
-    </header>
-    <router-view />
+    <SideBar />
+    <div class="main-text">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/common/NavBar.vue';
+import SideBar from '@/components/common/SideBar.vue';
 
 export default {
   name: 'App',
-  components: {NavBar},
+  components: {SideBar},
   beforeCreate() {
     // Sync stored username to current session
     fetch('/api/users/session', {
@@ -20,6 +20,7 @@ export default {
     }).then(res => res.json()).then(res => {
       const user = res.user;
       this.$store.commit('setUsername', user ? user.username : null);
+      this.$store.commit('setUser', user ? user : null);
     });
 
     // Clear alerts on page refresh
@@ -31,6 +32,8 @@ export default {
 <style>
 * {
   box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
 }
 
 body {
@@ -73,5 +76,9 @@ main {
 
 .alerts .success {
     background-color: rgb(45, 135, 87);
+}
+
+.main-text {
+  margin-left: 250px;
 }
 </style>

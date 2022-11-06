@@ -13,32 +13,15 @@
         <h2>Welcome to Fritter!</h2>
       </header>
       <article>
-        <h3>
-          <router-link to="/login">
-            Sign in
-          </router-link>
+        <h4>
+          <router-link to="/login">Sign in</router-link>
           to create, edit, and delete freets.
-        </h3>
+        </h4>
       </article>
     </section>
     <section>
       <header>
-        <div class="left">
-          <h2>
-            Viewing all freets
-            <span v-if="$store.state.filter">
-              by @{{ $store.state.filter }}
-            </span>
-          </h2>
-        </div>
-        <div class="right">
-          <GetFreetsForm
-            ref="getFreetsForm"
-            value="author"
-            placeholder="🔍 Filter by author (optional)"
-            button="🔄 Get freets"
-          />
-        </div>
+        <h3>Freet Feed</h3>
       </header>
       <section
         v-if="$store.state.freets.length"
@@ -61,13 +44,16 @@
 <script>
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
-import GetFreetsForm from '@/components/Freet/GetFreetsForm.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, GetFreetsForm, CreateFreetForm},
+  components: {FreetComponent, CreateFreetForm},
   mounted() {
-    this.$refs.getFreetsForm.submit();
+    this.$store.state.filter = '';
+    this.$store.commit('refreshFreets');
+    if (this.$store.state.username) { //user is logged in
+      this.$store.commit('refreshBookmarks');
+    }
   }
 };
 </script>
@@ -82,6 +68,10 @@ header, header > * {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+header h2 {
+  margin-bottom: 0px;
 }
 
 button {
