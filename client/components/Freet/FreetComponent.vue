@@ -11,7 +11,7 @@
           <h3 class="author">
             @{{ freet.author }}
           </h3>
-          <div v-if="$store.state.username">
+          <div v-if="$store.state.username && freet.author !== $store.state.username">
             <button
               v-if="isFollowed"
               @click="removeFollow"
@@ -76,7 +76,8 @@
           <img src="../../public/assets/heart_outline.png" alt="">
         </button>
         <p>
-          {{ freet.likedBy.length }} {{ freet.likedBy.length == 1 ? 'Like' : 'Likes' }} by ({{ freet.likedBy.join(', ') }})
+          {{ freet.likedBy.length }} {{ freet.likedBy.length == 1 ? 'Like' : 'Likes' }}
+          {{ freet.likedBy.length == 0 ? '' : 'by (' + freet.likedBy.join(', ') + ')' }} 
         </p>
       </div>
       <div
@@ -106,6 +107,11 @@
         </button>
       </div>
     </div>
+    <div v-if="isBookmarked">
+      <TagsComponent 
+        :bookmark="bookmarkForFreetId(freet._id)"
+      />
+    </div>
     <div>
       <p class="info">
         Posted at {{ freet.dateModified }}
@@ -125,8 +131,13 @@
 </template>
 
 <script>
+import TagsComponent from '@/components/Bookmark/TagsComponent.vue';
+
 export default {
   name: 'FreetComponent',
+  components: {
+    TagsComponent
+  },
   props: {
     // Data from the stored freet
     freet: {
@@ -163,6 +174,8 @@ export default {
       const params = {
         method: 'DELETE',
         callback: () => {
+          this.$store.commit('refreshFreets');
+          
           this.$store.commit('alert', {
             message: 'Successfully deleted freet!', status: 'success'
           });
@@ -203,37 +216,38 @@ export default {
       };
       this.request(`likes/${this.freet._id}`, params);
     },
-    // TODO - fix these
     addFollow() {
       /**
        * Add follow
        */
-      console.log("add follow to friend w/ id " + this.freet.authorId);
-      // const params = {
-      //   method: 'POST',
-      //   message: 'Successfully followed!',
-      //   body: JSON.stringify({friendId: this.freet.authorId}),
-      //   callback: () => {
-      //     this.$set(this.alerts, params.message, 'success');
-      //     setTimeout(() => this.$delete(this.alerts, params.message), 3000);
-      //   }
-      // };
-      // this.request(`follows/`, params);
+      const params = {
+        method: 'POST',
+        message: 'Successfully followed!',
+        body: JSON.stringify({friendId: this.freet.authorId}),
+        callback: () => {
+          this.$store.commit('refreshFollows');
+
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(`follows/`, params);
     },
     removeFollow() {
-      console.log("remove follow to friend w/ id " + this.freet.authorId);
       /**
        * Remove follow
        */
-      // const params = {
-      //   method: 'DELETE',
-      //   message: 'Successfully unfollowed!',
-      //   callback: () => {
-      //     this.$set(this.alerts, params.message, 'success');
-      //     setTimeout(() => this.$delete(this.alerts, params.message), 3000);
-      //   }
-      // };
-      // this.request(`follows/${this.freet.authorId}`, params);
+      const params = {
+        method: 'DELETE',
+        message: 'Successfully unfollowed!',
+        callback: () => {
+          this.$store.commit('refreshFollows');
+
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(`follows/${this.freet.authorId}`, params);
     },
     addBookmark() {
       /**
@@ -319,6 +333,9 @@ export default {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
+    },
+    bookmarkForFreetId(freetId) {
+      return this.$store.state.bookmarks.find(bookmark => bookmark.freetId._id === freetId)
     }
   },
   computed: {
@@ -326,8 +343,8 @@ export default {
       return this.freet.likedBy.includes(this.$store.state.username);
     },
     isFollowed() {
-      // TODO: make this right
-      return this.freet.likedBy.includes(this.$store.state.username);
+      const friendNames = this.$store.state.following.map(follow => { return follow.friendUsername });
+      return friendNames.includes(this.freet.author);
     },
     isBookmarked() {
       return this.$store.getters.bookmarkFreetIds.includes(this.freet._id);
@@ -384,5 +401,14 @@ export default {
 .actions {
   display: flex;
   align-items: center;
+}
+
+.actions p {
+  margin-bottom: 3px;
+}
+
+.content {
+  width: 100%;
+  resize: vertical;
 }
 </style>

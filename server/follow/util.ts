@@ -1,12 +1,15 @@
 import type {HydratedDocument, Types} from 'mongoose';
 import moment from 'moment';
 import type {Follow} from './model';
+import { User } from '../user/model';
 
 // Update this if you add a property to the User type!
 type FollowResponse = {
   _id: string;
-  userId: Types.ObjectId;
-  friendId: Types.ObjectId;
+  userId: string;
+  username: string;
+  friendId: string;
+  friendUsername: string;
   dateCreated: string;
 };
 
@@ -31,10 +34,12 @@ const constructFollowResponse = (follow: HydratedDocument<Follow>): FollowRespon
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-//   delete tagCopy.userId;
   return {
-    ...followCopy,
     _id: followCopy._id.toString(),
+    userId: followCopy.userId._id.toString(),
+    username: (followCopy.userId as unknown as User).username,
+    friendId: followCopy.friendId._id.toString(),
+    friendUsername: (followCopy.friendId as unknown as User).username,
     dateCreated: formatDate(followCopy.dateCreated)
   };
 };

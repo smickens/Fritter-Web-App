@@ -8,13 +8,6 @@
         titleText="Freets"
         placeholderText="Search by author..."
       />
-
-      <!-- <GetFreetsForm
-        ref="getFreetsForm"
-        value="author"
-        placeholder="🔍 Filter by author (optional)"
-        button="🔄 Get freets"
-      /> -->
     </header>
     <section
       v-if="$store.state.freets.length"

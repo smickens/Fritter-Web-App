@@ -13,7 +13,7 @@ export default {
       hasBody: true,
       setUsername: true,
       fields: [
-        {id: 'username', label: 'Username', value: ''}
+        {id: 'username', label: '', value: '', placeholder: 'Enter new username'}
       ],
       title: 'Change username',
       callback: () => {

@@ -9,7 +9,7 @@ const isBookmarkExists = async (req: Request, res: Response, next: NextFunction)
   if (!bookmark) {
     res.status(404).json({
       error: {
-        bookmarkNotFound: `Bookmark with for freet ${req.params.freetId} does not exist.`
+        bookmarkNotFound: `Bookmark for freet ${req.params.freetId} does not exist.`
       }
     });
     return;

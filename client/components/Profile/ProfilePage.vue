@@ -11,11 +11,16 @@
         </router-link>
       </header>
       <div class="follows-text">
-        <p>10 Followers</p>
-        <p>16 Following</p>
+        <p>{{ $store.state.followers.length }} Followers</p>
+        <p>{{ $store.state.following.length }} Following</p>
+        <button @click="toggleShowingFollows()">{{ viewingFollows ? 'Hide' : 'View' }}</button>
       </div>
     </section>
-    <section>
+    <div v-if="viewingFollows">
+      <FollowsPage />
+    </div>
+    <div v-else>
+      <section>
       <h3>My Personas</h3>
       <!-- <section
         v-if="$store.state.personas.length"
@@ -49,6 +54,7 @@
         You haven't posted any freets yet. Go to the home page to post your first freet!
       </section>
     </section>
+    </div>
   </main>
 </template>
 
@@ -57,6 +63,7 @@ import ChangeUsernameForm from '@/components/Settings/ChangeUsernameForm.vue';
 import ChangePasswordForm from '@/components/Settings/ChangePasswordForm.vue';
 import DeleteAccountForm from '@/components/Settings/DeleteAccountForm.vue';
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
+import FollowsPage from '@/components/Profile/FollowsPage.vue';
 
 export default {
   name: 'ProfilePage',
@@ -64,7 +71,19 @@ export default {
     ChangeUsernameForm,
     ChangePasswordForm,
     DeleteAccountForm,
-    FreetComponent
+    FreetComponent,
+    FollowsPage
+  },
+  data() {
+    return {
+      viewingFollows: false, // Whether or not this freet is in edit mode
+      alerts: {}, // Displays success/error messages encountered during freet modification
+    };
+  },
+  methods: {
+    toggleShowingFollows() {
+      this.viewingFollows = !this.viewingFollows;
+    }
   },
   computed: {
     ownFreets() {
@@ -72,6 +91,10 @@ export default {
         return freet.author === this.$store.state.username
       });
     }
+  },
+  mounted() {
+    this.$store.commit('refreshFollows');
+    this.$store.commit('refreshFollowers');
   }
 };
 </script>
@@ -95,10 +118,12 @@ header img {
 
 .follows-text {
   display: flex;
+  margin: 20px 0px;
 }
 
 .follows-text p {
   font-size: medium;
   padding-right: 10px;
+  margin: 0px;
 }
 </style>

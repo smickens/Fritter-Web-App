@@ -71,11 +71,15 @@ header, header > * {
 }
 
 header h2 {
-  margin-bottom: 0px;
+  font-weight: 400;
+}
+
+header h3 {
+  margin-bottom: 10px;
 }
 
 button {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 section .scrollbox {

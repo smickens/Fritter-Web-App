@@ -24,37 +24,39 @@ const isValidTag = (req: Request, res: Response, next: NextFunction) => {
 };
 
  const containsTag = async (req: Request, res: Response, next: NextFunction) => {
-    const {tag} = req.params as {tag: string};
+  const {tag} = req.params as {tag: string};
 
-    if (!checkIfTagIsValid(tag)) {
-      res.status(413).json({
-        error: 'Tag cannot be empty or more than 20 characters.'
-      });
-      return;
-    }
+  if (!checkIfTagIsValid(tag)) {
+    res.status(413).json({
+      error: 'Tag cannot be empty or more than 20 characters.'
+    });
+    return;
+  }
 
-    const bookmark = await TagCollection.findOne(req.params.bookmarkId, tag);
-    if (!bookmark) {
-      res.status(403).json({
-        error: `Cannot remove tag, ${tag}, that does not exist on this bookmark.`
-      });
-      return;
-    }
-  
-    next();
-  };
+  const bookmark = await BookmarkCollection.findOne(req.session.userId, req.params.freetId);
+  const bookmarkTag = await TagCollection.findOne(bookmark._id, tag);
+  if (!bookmarkTag) {
+    res.status(403).json({
+      error: `Cannot remove tag, ${tag}, that does not exist on this bookmark.`
+    });
+    return;
+  }
 
- const notContainsTag = async (req: Request, res: Response, next: NextFunction) => {
-    const bookmark = await TagCollection.findOne(req.params.bookmarkId, req.body.tag);
-    if (bookmark) {
-      res.status(403).json({
-        error: `Cannot add tag, ${req.body.tag}, that already exists on this bookmark.`
-      });
-      return;
-    }
-  
-    next();
-  };
+  next();
+};
+
+const notContainsTag = async (req: Request, res: Response, next: NextFunction) => {
+  const bookmark = await BookmarkCollection.findOne(req.session.userId, req.params.freetId);
+  const bookmarkTag = await TagCollection.findOne(bookmark._id, req.body.tag);
+  if (bookmarkTag) {
+    res.status(403).json({
+      error: `Cannot add tag, ${req.body.tag}, that already exists on this bookmark.`
+    });
+    return;
+  }
+
+  next();
+};
 
 export {
   isValidTag,

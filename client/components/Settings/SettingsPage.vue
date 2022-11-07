@@ -10,8 +10,10 @@
       <header>
         <h3>Account Settings</h3>
       </header>
-      <ChangeUsernameForm />
-      <ChangePasswordForm />
+      <div class="account-settings">
+        <ChangeUsernameForm />
+        <ChangePasswordForm />
+      </div>
     </section>
     <section>
       <header>
@@ -39,3 +41,14 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.account-settings {
+  display: flex;
+}
+
+.account-settings > * {
+  flex-basis: 100%;
+  padding-right: 10px;
+}
+</style>

@@ -3,7 +3,7 @@
 
 <template>
   <form @submit.prevent="submit">
-    <h3>{{ title }}</h3>
+    <h4>{{ title }}</h4>
     <article
       v-if="fields.length"
     >
@@ -11,12 +11,13 @@
         v-for="field in fields"
         :key="field.id"
       >
-        <label :for="field.id">{{ field.label }}:</label>
+        <label :for="field.id">{{ field.label }}</label>
         <textarea
           v-if="field.id === 'content'"
           :name="field.id"
           :value="field.value"
           @input="field.value = $event.target.value"
+          :placeholder="field.placeholder"
         />
         <input
           v-else
@@ -24,6 +25,7 @@
           :name="field.id"
           :value="field.value"
           @input="field.value = $event.target.value"
+          :placeholder="field.placeholder"
         >
       </div>
     </article>
@@ -117,8 +119,8 @@ export default {
 
 <style scoped>
 form {
-  border: 1px solid #111;
-  padding: 0.5rem;
+  /* border: 1px solid #111; */
+  /* padding: 0.5rem; */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -146,6 +148,7 @@ form h3 {
 
 textarea {
    font-family: inherit;
-   font-size: inherit;
+   font-size: medium;
+   resize: vertical;
 }
 </style>

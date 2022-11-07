@@ -24,7 +24,7 @@ class FollowCollection {
         dateCreated: date
     });
     await follow.save(); // Saves follow to MongoDB
-    return follow
+    return (await follow.populate('userId')).populate('friendId');
   }
 
   /**
@@ -44,7 +44,7 @@ class FollowCollection {
         personaId: personaId
     });
     await follow.save(); // Saves follow to MongoDB
-    return follow
+    return (await follow.populate('userId')).populate('friendId');
   }
 
   /**
@@ -55,17 +55,36 @@ class FollowCollection {
    * @return {Promise<HydratedDocument<Follow>> | Promise<null> } - The follow from the given userId to friendId, if any
    */
    static async findOne(userId: Types.ObjectId | string, friendId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
-    return FollowModel.findOne({ userId, friendId });
+    return FollowModel.findOne({ userId, friendId })
+            .populate('userId')
+            .populate('friendId')
+            .exec();
   }
 
   /**
-   * Get all follows for a given user
+   * Get all follows by a given user
    *
    * @param {string} userId - The userId of the user
    * @return {Promise<HydratedDocument<Follow>[]>} - An array of all of the follows for this user
    */
   static async findAllByUser(userId: Types.ObjectId | string): Promise<Array<HydratedDocument<Follow>>> {
-    return FollowModel.find({ userId });
+    return FollowModel.find({ userId })
+            .populate('userId')
+            .populate('friendId')
+            .exec();
+  }
+
+  /**
+   * Get all followers for a given user
+   *
+   * @param {string} userId - The userId of the user
+   * @return {Promise<HydratedDocument<Follow>[]>} - An array of all of the follows for this user
+   */
+  static async findAllToUser(friendId: Types.ObjectId | string): Promise<Array<HydratedDocument<Follow>>> {
+    return FollowModel.find({ friendId })
+            .populate('userId')
+            .populate('friendId')
+            .exec();
   }
 
   /**
@@ -75,7 +94,10 @@ class FollowCollection {
    * @return {Promise<HydratedDocument<Follow>[]>} - An array of all of the follows for this user
    */
   static async findAllByPersona(personaId: Types.ObjectId | string): Promise<Array<HydratedDocument<Follow>>> {
-    return FollowModel.find({ personaId: personaId });
+    return FollowModel.find({ personaId: personaId })
+            .populate('userId')
+            .populate('friendId')
+            .exec();
   }
 
   /**
@@ -95,7 +117,7 @@ class FollowCollection {
       follow.personaId = null;
     }
     await follow.save();
-    return follow;
+    return (await follow.populate('userId')).populate('friendId');
   }
 
   /**

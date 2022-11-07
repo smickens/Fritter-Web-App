@@ -10,23 +10,22 @@ import * as util from './util';
 const router = express.Router();
 
 /**
- * Get all follows for user with USER_ID
+ * Get all follows by user
  *
- * @name GET /api/follows?account=USER_ID
+ * @name GET /api/follows
  *
- * @return {FollowResponse[]} - An array of follows created by user with id, USER_ID
- * @throws {400} - If account is not given
+ * @return {FollowResponse[]} - An array of follows created by current user
  * @throws {403} - if the user is not logged in
  * @throws {404} - If no user has given USER_ID
  *
  */
 /**
- * Get all follows for user with USER_ID and persona name NAME
+ * Get all follows from user with USER_ID and persona name NAME
  *
- * @name GET /api/follows?account=USER_ID&name=NAME
+ * @name GET /api/follows?name=NAME
  *
  * @return {FollowResponse[]} - An array of follows created by user with id under persona with name, USER_ID
- * @throws {400} - If account or name is not given
+ * @throws {400} - If name is not given
  * @throws {403} - if the user is not logged in
  * @throws {404} - If no user has given USER_ID or user does not have persona with NAME
  *
@@ -34,8 +33,7 @@ const router = express.Router();
 router.get(
     '/',
     [
-      userValidator.isUserLoggedIn,
-      followValidator.isValidAccount
+      userValidator.isUserLoggedIn
     ],
     async (req: Request, res: Response, next: NextFunction) => {
       // Check if name query parameter was supplied
@@ -44,7 +42,7 @@ router.get(
         return;
       }
 
-      const userFollows = await FollowCollection.findAllByUser(req.query.account as string);
+      const userFollows = await FollowCollection.findAllByUser(req.session.userId);
       const response = userFollows.map(util.constructFollowResponse);
       res.status(200).json(response);
     },
@@ -58,6 +56,28 @@ router.get(
       res.status(200).json(response);
     }
   );
+
+/**
+ * Get all followers for a user
+ *
+ * @name GET /api/follows/followers
+ *
+ * @return {FollowResponse[]} - An array of followers for the current user
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - If no user has given USER_ID
+ *
+ */
+ router.get(
+  '/followers',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userFollowers = await FollowCollection.findAllToUser(req.session.userId);
+    const response = userFollowers.map(util.constructFollowResponse);
+    res.status(200).json(response);
+  }
+);
 
 /**
  * Add a follow between a user and friend

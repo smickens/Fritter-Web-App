@@ -7,6 +7,7 @@ import { User } from '../user/model';
 type FreetResponse = {
   _id: string;
   author: string;
+  authorId: string;
   dateCreated: string;
   content: string;
   dateModified: string;
@@ -34,15 +35,16 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-  const {username} = freetCopy.authorId;
+
+  const author = freetCopy.authorId;
   delete freetCopy.authorId;
 
   const likedByUsernames = freetCopy.likedBy.map(like => { return (like.userId as unknown as User).username });
 
   return {
-    //...freetCopy,
     _id: freetCopy._id.toString(),
-    author: username,
+    author: author.username,
+    authorId: author._id.toString(),
     dateCreated: formatDate(freet.dateCreated),
     dateModified: formatDate(freet.dateModified),
     content: freetCopy.content,

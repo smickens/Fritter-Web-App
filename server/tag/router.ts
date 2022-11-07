@@ -45,7 +45,7 @@ router.get(
  * @throws {403} - If newTag is currently a tag associated with the bookmark
  */
 router.post(
-  '/:bookmarkId/tags',
+  '/:freetId/tags',
   [
     userValidator.isUserLoggedIn,
     bookmarkValidator.isBookmarkExists,
@@ -66,7 +66,7 @@ router.post(
 /**
  * Remove a tag off a bookmark
  *
- * @name DELETE /api/bookmarks/:bookmarkId/:tag
+ * @name DELETE /api/bookmarks/:freetId/tags/:tag
  *
  * @param {string} tag - the tag to remove from the bookmark
  * @return {BookmarkResponse} - the updated bookmark

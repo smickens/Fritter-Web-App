@@ -45,6 +45,12 @@ class BookmarkCollection {
                   }
                 }
               })
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'authorId'
+                }
+              })
               .populate('tags')
               .exec();
   }
@@ -64,6 +70,12 @@ class BookmarkCollection {
                   populate: {
                     path: 'userId'
                   }
+                }
+              })
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'authorId'
                 }
               })
               .populate('tags')

@@ -14,6 +14,8 @@ const store = new Vuex.Store({
     username: null, // Username of the logged in user
     user: null,
     bookmarks: [],
+    followers: [],
+    following: [],
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
   getters: {
@@ -21,7 +23,7 @@ const store = new Vuex.Store({
       return state.bookmarks.map(bookmark => {
         return bookmark.freetId._id
       })
-    },
+    }
   },
   mutations: {
     alert(state, payload) {
@@ -75,6 +77,20 @@ const store = new Vuex.Store({
        */
       const res = await fetch('/api/bookmarks').then(async r => r.json());
       state.bookmarks = res;
+    },
+    async refreshFollows(state) {
+      /**
+       * Request the server for the current user's bookmarks.
+       */
+      const res = await fetch('/api/follows').then(async r => r.json());
+      state.following = res;
+    },
+    async refreshFollowers(state) {
+      /**
+       * Request the server for the current user's bookmarks.
+       */
+      const res = await fetch('/api/follows/followers').then(async r => r.json());
+      state.followers = res;
     }
   },
   // Store data across page refreshes, only discard on browser close
