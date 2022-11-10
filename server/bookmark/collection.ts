@@ -88,6 +88,33 @@ class BookmarkCollection {
    * @param {string} userId - The userId of the user
    * @return {Promise<HydratedDocument<Bookmark>[]>} - An array of all of the bookmarks for this user
    */
+  static async findAllByFreet(freetId: Types.ObjectId | string): Promise<Array<HydratedDocument<Bookmark>>> {
+    return BookmarkModel.find({freetId: freetId}).sort({dateCreated: -1})
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'likedBy',
+                  populate: {
+                    path: 'userId'
+                  }
+                }
+              })
+              .populate({
+                path: 'freetId',
+                populate: {
+                  path: 'authorId'
+                }
+              })
+              .populate('tags')
+              .exec();
+  }
+
+  /**
+   * Get all the bookmarks by a given userId
+   *
+   * @param {string} userId - The userId of the user
+   * @return {Promise<HydratedDocument<Bookmark>[]>} - An array of all of the bookmarks for this user
+   */
   static async findAllByUserWithTag(userId: Types.ObjectId | string, tagName: string): Promise<Array<HydratedDocument<Bookmark>>> {
     const bookmarkByUser = this.findAllByUser(userId);
     return (await bookmarkByUser).filter(bookmark => { 

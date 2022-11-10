@@ -43,6 +43,15 @@ import LikeModel from './model';
     }
 
     /**
+     * Delete all the likes by a given user
+     *
+     * @param {string} userId - The id of the user
+     */
+    static async deleteManyByUser(userId: Types.ObjectId | string): Promise<void> {
+      await LikeModel.deleteMany({userId: userId});
+    }
+
+    /**
      * Delete all the likes for a given freet
      *
      * @param {string} freetId - The id of the freet to remove all likes for

@@ -107,7 +107,7 @@
         </button>
       </div>
     </div>
-    <div v-if="$store.state.username && isBookmarked">
+    <div v-if="$store.state.username && isBookmarked && bookmarkForFreetId(freet._id)">
       <TagsComponent 
         :bookmark="bookmarkForFreetId(freet._id)"
       />
@@ -403,7 +403,15 @@ export default {
       return this.isSavedFreet ? this.freet.authorId.username : this.freet.author;
     },
     freetLikedBy() {
-      return this.isSavedFreet ? this.freet.likedBy.map(like => { return like.userId.username }) : this.freet.likedBy;
+      if (this.isSavedFreet) {
+        const filteredLikes = this.freet.likedBy.filter(like => {
+          return like.userId;
+        });
+        return filteredLikes.map(like => {
+          return like.userId ? like.userId.username : ''
+        })
+      }
+      return this.freet.likedBy;
     },
     freetDate() {
       if (!this.isSavedFreet) {

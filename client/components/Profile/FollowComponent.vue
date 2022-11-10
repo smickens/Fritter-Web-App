@@ -59,6 +59,12 @@ export default {
       this.editingPersona = false;
     },
     editPersona() {
+      // if same as current persona or already none and trying to change to none, stop editing
+      if (this.selectedPersona == '' || this.selectedPersona == this.followPersonaName) {
+        this.stopEditingPersona();
+        return;
+      }
+
       if (this.selectedPersona == "None") {
         // Remove persona for this follow
         const params = {

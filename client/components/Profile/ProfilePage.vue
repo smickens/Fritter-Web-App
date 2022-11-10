@@ -13,7 +13,7 @@
       <div class="follows-text">
         <p>{{ $store.state.followers.length }} Followers</p>
         <p>{{ $store.state.following.length }} Following</p>
-        <router-link to="/follows" custom v-slot="{ navigate }">
+        <router-link v-if="$store.state.followers.length > 0 || $store.state.following.length > 0" to="/follows" custom v-slot="{ navigate }">
           <button @click="navigate" role="link">View</button>
         </router-link>
       </div>

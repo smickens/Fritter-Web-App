@@ -39,11 +39,15 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
   const author = freetCopy.authorId;
   delete freetCopy.authorId;
 
-  const likedByUsernames = freetCopy.likedBy.map(like => { return (like.userId as unknown as User).username });
+  const likedByUsernames = freetCopy.likedBy.map(like => { 
+    if (like.userId as unknown as User) {
+      return (like.userId as unknown as User).username;
+    }
+  });
 
   return {
     _id: freetCopy._id.toString(),
-    author: author.username,
+    author: author ? author.username : null,
     authorId: author._id.toString(),
     dateCreated: formatDate(freet.dateCreated),
     dateModified: formatDate(freet.dateModified),

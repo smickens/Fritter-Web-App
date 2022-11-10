@@ -71,19 +71,22 @@ export default {
   },
   methods: {
     async handleSearch(value) {
+      if (value.length > 0 && value.trim().length === 0) { // just whitespace in search
+        // cannot search for empty string
+        const e = ('status', 'empty_text_alert', 'Search text for author name cannot be empty');
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+        
+        this.searchAuthor = '';
+        return;
+      }
+
+      this.searching = true;
+      
       // clear old alerts
       this.alerts = {};
-      this.searching = true;
 
-      // if (value.trim().length === 0) {
-      //   // cannot search for empty string
-      //   const e = ('status', 'empty_text_alert', 'Search text for author name cannot be empty');
-      //   this.$set(this.alerts, e, 'error');
-      //   setTimeout(() => this.$delete(this.alerts, e), 3000);
-      //   return;
-      // }
-
-      this.searchAuthor = value;
+      this.searchAuthor = value.trim();
 
       this.$store.state.filter = this.searchAuthor;
 
@@ -110,8 +113,10 @@ export default {
   mounted() {
     this.$store.state.filter = '';
     this.$store.commit('refreshFreets');
-    this.$store.commit('refreshBookmarks');
-    this.$store.commit('refreshFollows');
+    if (this.$store.state.username) {
+      this.$store.commit('refreshBookmarks');
+      this.$store.commit('refreshFollows');
+    }
   }
 };
 </script>

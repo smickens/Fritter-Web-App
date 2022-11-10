@@ -67,12 +67,22 @@ export default {
   },
   methods: {
     async handleSearch(value) {
+      if (value.length > 0 && value.trim().length === 0) { // just whitespace in search
+        // cannot search for empty string
+        const e = ('status', 'empty_text_alert', 'Search text for tag cannot be empty');
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+        
+        this.searchTag = '';
+        return;
+      }
+
       this.searching = true;
 
       // clear old alerts
       this.alerts = {};
 
-      this.searchTag = value;
+      this.searchTag = value.trim();
 
       this.$store.state.bookmarkFilter = this.searchTag;
 

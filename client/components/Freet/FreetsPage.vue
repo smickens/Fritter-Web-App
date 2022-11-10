@@ -15,13 +15,13 @@
       <article>
         <h4>
           <router-link to="/login">Sign in</router-link>
-          to create, edit, and delete freets.
+          to create your own and save freets.
         </h4>
       </article>
     </section>
     <section>
       <header class="freet-header">
-        <h3>Freet Feed</h3>
+        <h3>{{ $store.state.username ? 'Freet Feed' : 'All Freets' }}</h3>
         <h5 v-if="$store.state.username && $store.getters.activePersonas.length">Active Personas - {{ activePersonasNames.join(', ') }}</h5>
       </header>
       <section
@@ -102,7 +102,7 @@ export default {
       }) 
     },
     noFreetsInFeedErroMessage() {
-      return this.$store.state.following.length == 0 ? 'No freets found since you are not following any other users. Go to the browse page to explore freets and find other users to follow.' : (this.$store.getters.activePersonas.length > 0 ? 'No freets found under the current persona(s): ' + this.activePersonasNames.join(', ') : 'No freets found');
+      return this.$store.state.following.length == 0 ? 'No freets found since you are not following any other users. Go to the browse page to explore freets and find other users to follow.' : (this.$store.getters.activePersonas.length > 0 ? 'No freets found under the current persona(s): ' + this.activePersonasNames.join(', ') + '. Go to your profile and view who you are following to edit what persona their posts show up under.' : 'No freets found');
     }
   }
 };

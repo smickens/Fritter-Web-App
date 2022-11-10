@@ -25,7 +25,10 @@ const store = new Vuex.Store({
       if (!state.bookmarks) {
         return [];
       }
-      return state.bookmarks.map(bookmark => {
+      const filteredBookmarks = state.bookmarks.filter(bookmark => {
+        return bookmark.freetId;
+      });
+      return filteredBookmarks.map(bookmark => {
         return bookmark.freetId._id
       })
     },

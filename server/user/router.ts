@@ -8,6 +8,7 @@ import PersonaCollection from '../persona/collection';
 import LikeCollection from '../like/collection';
 import TagCollection from '../tag/collection';
 import { Bookmark } from '../bookmark/model';
+import { Freet } from '../freet/model';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
 
@@ -166,6 +167,17 @@ router.delete(
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     
+    const freetsByUser = await FreetCollection.findAllByUserId(userId);
+    // delete all likes, bookmarks, and tags associated with these posts
+    freetsByUser.forEach(async (freet: Freet) => {
+      await LikeCollection.deleteMany(freet._id);
+      const bookmarksForFreet = await BookmarkCollection.findAllByFreet(freet._id);
+      bookmarksForFreet.forEach(async (bookmark: Bookmark) => {
+        await TagCollection.deleteMany(bookmark._id);
+      });
+      await BookmarkCollection.deleteManyByFreetId(freet._id);
+    });
+
     await FreetCollection.deleteMany(userId);
     await FollowCollection.deleteMany(userId);
 
@@ -176,7 +188,8 @@ router.delete(
     await BookmarkCollection.deleteManyByUserId(userId);
 
     await PersonaCollection.deleteMany(userId);
-    await LikeCollection.deleteMany(userId);
+    await LikeCollection.deleteManyByUser(userId);
+
     await UserCollection.deleteOne(userId);
 
     req.session.userId = undefined;
