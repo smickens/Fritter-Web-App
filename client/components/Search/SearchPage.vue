@@ -43,7 +43,7 @@
       <h3 v-if="searchAuthor != ''">
         No freets found from author <span>{{ searchAuthor }}</span>
       </h3>
-      <h3 v-else> 
+      <h3 v-else-if="!searching"> 
         No freets found
       </h3>
     </article>
@@ -64,6 +64,7 @@ export default {
   },
   data() {
     return {
+      searching: false,
       searchAuthor: '',
       alerts: {}
     };
@@ -72,14 +73,15 @@ export default {
     async handleSearch(value) {
       // clear old alerts
       this.alerts = {};
+      this.searching = true;
 
-      if (value.trim().length === 0) {
-        // cannot search for empty string
-        const e = ('status', 'empty_text_alert', 'Search text for author name cannot be empty');
-        this.$set(this.alerts, e, 'error');
-        setTimeout(() => this.$delete(this.alerts, e), 3000);
-        return;
-      }
+      // if (value.trim().length === 0) {
+      //   // cannot search for empty string
+      //   const e = ('status', 'empty_text_alert', 'Search text for author name cannot be empty');
+      //   this.$set(this.alerts, e, 'error');
+      //   setTimeout(() => this.$delete(this.alerts, e), 3000);
+      //   return;
+      // }
 
       this.searchAuthor = value;
 
@@ -93,10 +95,13 @@ export default {
           throw new Error(res.error);
         }
 
+        this.searching = false;
+
         this.$store.commit('updateFilter', this.searchAuthor);
         this.$store.commit('updateFreets', res);
       } catch (e) {
-        console.log(e)
+        this.searching = false;
+
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
@@ -105,6 +110,8 @@ export default {
   mounted() {
     this.$store.state.filter = '';
     this.$store.commit('refreshFreets');
+    this.$store.commit('refreshBookmarks');
+    this.$store.commit('refreshFollows');
   }
 };
 </script>

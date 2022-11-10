@@ -149,7 +149,7 @@ export default {
   flex-direction: column;
   flex-basis: 100%;
   flex: 1;
-  max-width: 250px;
+  max-width: 300px;
 }
 
 .persona {

@@ -39,7 +39,7 @@
       <h3 v-if="searchTag != ''">
         You do not have any bookmarks with tag <span>{{ searchTag }}</span>
       </h3>
-      <h3 v-else> 
+      <h3 v-else-if="!searching"> 
         You do not have any bookmarks. When you see a freet you want to save press the 
         <img src="../../public/assets/bookmark_outline.png" alt="">
         icon to save it.
@@ -60,22 +60,17 @@ export default {
   },
   data() {
     return {
+      searching: false,
       searchTag: '',
       alerts: {}
     };
   },
   methods: {
     async handleSearch(value) {
+      this.searching = true;
+
       // clear old alerts
       this.alerts = {};
-
-      if (value.trim().length === 0) {
-        // cannot search for empty string
-        const e = ('status', 'empty_text_alert', 'Search text for tag cannot be empty');
-        this.$set(this.alerts, e, 'error');
-        setTimeout(() => this.$delete(this.alerts, e), 3000);
-        return;
-      }
 
       this.searchTag = value;
 
@@ -89,9 +84,13 @@ export default {
           throw new Error(res.error);
         }
 
+        this.searching = false;
+
         this.$store.commit('updateBookmarkFilter', this.searchTag);
         this.$store.commit('updateBookmarks', res);
       } catch (e) {
+        this.searching = false;
+
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
@@ -100,6 +99,7 @@ export default {
   mounted() {
     this.$store.state.bookmarkFilter = '';
     this.$store.commit('refreshBookmarks');
+    this.$store.commit('refreshFollows');
   },
 };
 </script>
@@ -126,6 +126,7 @@ h3 {
 
 h3 img {
   margin-bottom: -4px;
+  width: 24px;
 }
 
 h3 span {

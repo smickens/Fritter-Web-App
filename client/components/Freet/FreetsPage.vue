@@ -22,7 +22,7 @@
     <section>
       <header class="freet-header">
         <h3>Freet Feed</h3>
-        <h5 v-if="$store.getters.activePersonas.length">Active Personas - {{ activePersonasNames.join(', ') }}</h5>
+        <h5 v-if="$store.state.username && $store.getters.activePersonas.length">Active Personas - {{ activePersonasNames.join(', ') }}</h5>
       </header>
       <section
         v-if="userFeed.length"
@@ -55,6 +55,7 @@ export default {
     if (this.$store.state.username) { //user is logged in
       this.$store.commit('refreshBookmarks');
       this.$store.commit('refreshFollows');
+      this.$store.commit('refreshPersonas');
     }
   },
   computed: {
@@ -77,7 +78,7 @@ export default {
       var feedFollows = this.$store.state.following;
       const activePersonasIds = this.$store.getters.activePersonas.map(persona => { return persona.id });
 
-      if (activePersonasIds.length > 0) {
+      if (feedFollows.length > 0 && activePersonasIds.length > 0) {
         const filteredFollows = this.$store.state.following.filter(follow => {
           const validPersonaId = follow.personaId ? follow.personaId.id : null;
           if (validPersonaId && activePersonasIds.includes(validPersonaId)) {

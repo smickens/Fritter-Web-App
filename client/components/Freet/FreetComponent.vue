@@ -88,13 +88,13 @@
           v-if="editing"
           @click="submitEdit"
         >
-          ✅ Save changes
+          ✅ Save
         </button>
         <button
           v-if="editing"
           @click="stopEditing"
         >
-          🚫 Discard changes
+          🚫 Discard
         </button>
         <button
           v-if="!editing"
@@ -102,7 +102,7 @@
         >
           ✏️ Edit
         </button>
-        <button @click="deleteFreet">
+        <button v-if="!editing" @click="deleteFreet">
           🗑️ Delete
         </button>
       </div>
