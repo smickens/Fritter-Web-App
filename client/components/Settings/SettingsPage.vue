@@ -6,21 +6,19 @@
     <section>
       <header>
         <h2 class="title">@{{ $store.state.username }}</h2>
+        <router-link to="/profile" custom v-slot="{ navigate }">
+          <button @click="navigate" role="link">Return to Profile</button>
+        </router-link>
       </header>
-      <header>
-        <h3>Account Settings</h3>
-      </header>
+    </section>
+    <section>
+      <h3>Account Settings</h3>
       <div class="account-settings">
         <ChangeUsernameForm />
         <ChangePasswordForm />
+        <LogoutForm />
+        <DeleteAccountForm />
       </div>
-    </section>
-    <section>
-      <header>
-        <h3>Account Management</h3>
-      </header>
-      <LogoutForm />
-      <DeleteAccountForm />
     </section>
   </main>
 </template>
@@ -44,11 +42,21 @@ export default {
 
 <style scoped>
 .account-settings {
-  display: flex;
+  max-width: 400px;
 }
 
-.account-settings > * {
-  flex-basis: 100%;
-  padding-right: 10px;
+header {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0px;
+}
+
+header h2 {
+  margin: 0px;
+}
+
+.title {
+  font-weight: 400;
+  margin: 0px;
 }
 </style>

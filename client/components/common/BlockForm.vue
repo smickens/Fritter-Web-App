@@ -35,7 +35,7 @@
     <button
       type="submit"
     >
-      {{ title }}
+      {{ buttonText }}
     </button>
     <section class="alerts">
       <article
@@ -85,6 +85,12 @@ export default {
             return [id, value];
           })
         ));
+      }
+
+      if (this.confirmAlertMessage) {
+        if (!confirm(this.confirmAlertMessage)) {
+          return;
+        }
       }
 
       try {
@@ -147,8 +153,8 @@ form h3 {
 }
 
 textarea {
-   font-family: inherit;
-   font-size: medium;
-   resize: vertical;
+  font-family: inherit;
+  font-size: medium;
+  resize: vertical;
 }
 </style>

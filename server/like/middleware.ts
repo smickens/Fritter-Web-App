@@ -11,7 +11,7 @@ const isLiked = async (req: Request, res: Response, next: NextFunction) => {
     const like = validFormat ? await LikeCollection.findOne(req.session.userId, req.params.freetId) : '';
     if (!like) {
       res.status(403).json({
-        error: `Like for freet from user with ID ${req.session.userId} with freet ID ${req.params.freetId} does not exist.`
+        error: `Like does not exist.`
       });
       return;
     }
@@ -27,7 +27,7 @@ const isNotLiked = async (req: Request, res: Response, next: NextFunction) => {
     const like = validFormat ? await LikeCollection.findOne(req.session.userId, req.body.freetId) : '';
     if (like) {
       res.status(403).json({
-        error: `Like for freet from user with ID ${req.session.userId} with freet ID ${req.body.freetId} already exists.`
+        error: `Like already exists.`
       });
       return;
     }

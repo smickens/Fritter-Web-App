@@ -74,7 +74,7 @@ router.post(
 
     res.status(201).json({
       message: 'Your persona was created successfully.',
-      bookmark: util.constructPersonaResponse(persona)
+      persona: util.constructPersonaResponse(persona)
     });
   }
 );
@@ -82,7 +82,7 @@ router.post(
 /**
  * Delete a persona
  *
- * @name DELETE /api/personas/:name
+ * @name DELETE /api/personas/:name?
  *
  * @param {string} name - the name of the persona to remove
  * @return {string} - A success message
@@ -90,20 +90,50 @@ router.post(
  * @throws {400} - if the `name` is missing in the req or invalid
  */
  router.delete(
-    '/:name',
-    [
-      userValidator.isUserLoggedIn,
-      personaValidator.isPersonaExists
-    ],
-    async (req: Request, res: Response) => {
-        const userPersona = await PersonaCollection.findOneByName(req.session.userId, req.params.name as string);
-        await PersonaCollection.deleteOne(req.session.userId, userPersona._id);
-        await FollowCollection.updateMany(userPersona._id);
+  '/:name?',
+  [
+    userValidator.isUserLoggedIn,
+    personaValidator.isPersonaExists
+  ],
+  async (req: Request, res: Response) => {
+    const userPersona = await PersonaCollection.findOneByName(req.session.userId, req.params.name as string);
+    await PersonaCollection.deleteOne(req.session.userId, userPersona._id);
+    await FollowCollection.updateMany(userPersona._id);
 
-        res.status(200).json({
-        message: 'Your persona was deleted successfully.'
-        });
-    }
-  );
+    res.status(200).json({
+    message: 'Your persona was deleted successfully.'
+    });
+  }
+);
+
+
+/**
+ * Modify a persona's active state
+ *
+ * @name PATCH /api/personas/:personaId?
+ *
+ * @param {string} personaId - the id of the persona to update to
+ * @param {boolean} isActive - persona's new active state
+ * @return {PersonaResponse} - the updated persona
+ * @throws {403} - if the user is not logged in
+ * @throws {400} - if the personaId is missing in the req or invalid
+ * @throws {403} - if persona already has this active state
+ */
+ router.patch(
+  '/:personaId?',
+  [
+    userValidator.isUserLoggedIn,
+    personaValidator.isValidPersonaId,
+    personaValidator.isSameActiveState
+  ],
+  async (req: Request, res: Response) => {
+    const userPersona = await PersonaCollection.updateOne(req.params.personaId as string, req.body.isActive);
+
+    res.status(200).json({
+      message: `Your persona active state was updated to ${userPersona.isActive ? 'active' : 'not active'} successfully.`,
+      persona: util.constructPersonaResponse(userPersona)
+    });
+  }
+);
 
 export {router as personaRouter};

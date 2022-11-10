@@ -10,9 +10,11 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     filter: null, // Username to filter shown freets by (null = show all)
+    bookmarkFilter: null, // Tag to filter shown bookmarks by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
     user: null,
+    personas: [],
     bookmarks: [],
     followers: [],
     following: [],
@@ -20,10 +22,26 @@ const store = new Vuex.Store({
   },
   getters: {
     bookmarkFreetIds(state) {
+      if (!state.bookmarks) {
+        return [];
+      }
       return state.bookmarks.map(bookmark => {
         return bookmark.freetId._id
       })
-    }
+    },
+    bookmarkFreets(state) {
+      return state.bookmarks.map(bookmark => {
+        return bookmark.freetId 
+      });
+    },
+    activePersonas(state) {
+      if (!state.personas) {
+        return [];
+      }
+      return state.personas.filter(persona => {
+        return persona.isActive
+      })
+    },
   },
   mutations: {
     alert(state, payload) {
@@ -71,12 +89,27 @@ const store = new Vuex.Store({
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
     },
+    updateBookmarkFilter(state, filter) {
+      /**
+       * Update the stored bookmarks filter to the specified one.
+       * @param filter - Tag to filter tags by
+       */
+      state.bookmarkFilter = filter;
+    },
     async refreshBookmarks(state) {
       /**
        * Request the server for the current user's bookmarks.
        */
-      const res = await fetch('/api/bookmarks').then(async r => r.json());
+      const url = state.bookmarkFilter ? `/api/bookmarks?tag=${state.bookmarkFilter}` : '/api/bookmarks';
+      const res = await fetch(url).then(async r => r.json());
       state.bookmarks = res;
+    },
+    updateBookmarks(state, bookmarks) {
+      /**
+       * Update the stored bookmarks to the provided bookmarks.
+       * @param bookmarks - Bookmarks to store
+       */
+      state.bookmarks = bookmarks;
     },
     async refreshFollows(state) {
       /**
@@ -91,7 +124,14 @@ const store = new Vuex.Store({
        */
       const res = await fetch('/api/follows/followers').then(async r => r.json());
       state.followers = res;
-    }
+    },
+    async refreshPersonas(state) {
+      /**
+       * Request the server for the current user's bookmarks.
+       */
+      const res = await fetch('/api/personas').then(async r => r.json());
+      state.personas = res;
+    },
   },
   // Store data across page refreshes, only discard on browser close
   plugins: [createPersistedState()]

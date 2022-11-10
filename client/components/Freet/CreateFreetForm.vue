@@ -15,6 +15,7 @@ export default {
         {id: 'content', label: '', value: '', placeholder: 'Type something...'}
       ],
       title: 'Create a new freet',
+      buttonText: 'Post Freet',
       refreshFreets: true,
       callback: () => {
         const message = 'Successfully created a freet!';

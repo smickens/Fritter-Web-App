@@ -47,38 +47,40 @@ body {
 
 main {
   padding: 0 5em 5em;
-}
-
-.alerts {
-    position: absolute;
-    z-index: 99;
-    bottom: 0;
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, 10%);
-    width: 100%;
-    text-align: center;
-}
-
-.alerts article {
-    border-radius: 5px;
-    padding: 10px 20px;
-    color: #fff;
-}
-
-.alerts p {
-    margin: 0;
-}
-
-.alerts .error {
-    background-color: rgb(166, 23, 33);
-}
-
-.alerts .success {
-    background-color: rgb(45, 135, 87);
+  max-width: 1000px;
+  margin: auto;
 }
 
 .main-text {
-  margin-left: 250px;
+  margin-left: 280px;
+}
+
+.alerts {
+  position: absolute;
+  z-index: 99;
+  bottom: 0;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 10%);
+  width: 100%;
+  text-align: center;
+}
+
+.alerts article {
+  border-radius: 5px;
+  padding: 10px 20px;
+  color: #fff;
+}
+
+.alerts p {
+  margin: 0;
+}
+
+.alerts .error {
+  background-color: rgb(166, 23, 33);
+}
+
+.alerts .success {
+  background-color: rgb(45, 135, 87);
 }
 </style>

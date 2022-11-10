@@ -35,12 +35,13 @@ const constructFollowResponse = (follow: HydratedDocument<Follow>): FollowRespon
     })
   };
   return {
+    ...followCopy,
     _id: followCopy._id.toString(),
     userId: followCopy.userId._id.toString(),
     username: (followCopy.userId as unknown as User).username,
     friendId: followCopy.friendId._id.toString(),
     friendUsername: (followCopy.friendId as unknown as User).username,
-    dateCreated: formatDate(followCopy.dateCreated)
+    dateCreated: formatDate(followCopy.dateCreated),
   };
 };
 

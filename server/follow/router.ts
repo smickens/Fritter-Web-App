@@ -160,6 +160,33 @@ router.post(
   );
 
 /**
+ * Unfollow a user with friendId
+ *
+ * @name DELETE /api/follows/:friendId/persona
+ *
+ * @param {string} friendId - the user id to remove persona for
+ * @return {string} - A success message
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the friendId is not valid
+ * @throws {403} - if user is not currently following the user with friendId
+ */
+ router.delete(
+  '/:friendId/persona',
+  [
+    userValidator.isUserLoggedIn,
+    followValidator.isValidFriend,
+    followValidator.canNotFollow, // already following
+    followValidator.hasPersona
+  ],
+  async (req: Request, res: Response) => {
+      await FollowCollection.updateOne(req.session.userId, req.params.friendId, null);
+      res.status(200).json({
+      message: `Persona for follow to ${req.params.friendId} was deleted successfully.`
+      });
+  }
+);
+
+/**
  * Modify a follow's persona
  *
  * @name PATCH /api/follows/:friendId?

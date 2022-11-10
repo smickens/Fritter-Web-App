@@ -9,30 +9,30 @@
     <div class="middle">
       <router-link 
         to="/"
-        :class="{ 'selected':($route.path=== '/') }"
+        :class="{ 'selected':(isOnHome) }"
       >
         <img :src="getHomeIcon()" class="icon">
         Home
       </router-link>
       <router-link
-        to="/search"
-        :class="{ 'selected':($route.path === '/search') }"
+        to="/browse"
+        :class="{ 'selected':(isOnBrowse) }"
       >
         <img :src="getSearchIcon()" class="icon">
-        Search
+        Browse
       </router-link>
       <router-link
         v-if="$store.state.username"
-        to="/bookmark"
-        :class="{ 'selected':($route.path === '/bookmark') }"
+        to="/saved"
+        :class="{ 'selected':(isOnSaved) }"
       >
         <img :src="getBookmarkIcon()" class="icon">
-        Bookmarks
+        Saved
       </router-link>
       <router-link
         v-if="$store.state.username"
         to="/profile"
-        :class="{ 'selected':($route.path === '/profile') }"
+        :class="{ 'selected':(isOnProfile) }"
       >
         <img :src="getUserIcon()" class="icon">
         Profile
@@ -40,16 +40,12 @@
       <router-link
         v-else
         to="/login"
-        :class="{ 'selected':($route.path === '/login') }"
+        :class="{ 'selected':(isOnLogin) }"
       >
         <img :src="getLoginIcon()" class="icon">
         Login
       </router-link>
     </div>
-
-    <!-- <div v-if="$store.state.username">
-      <p>Signed in as @{{$store.state.username}}</p>
-    </div> -->
 
     <section class="alerts">
       <article
@@ -68,34 +64,36 @@ export default {
   name: 'SideBar',
   methods: {
     getHomeIcon() {
-      if (this.$route.path === '/') {
-        return './assets/home_filled.png';
-      }
-      return './assets/home_outline.png';
+      return this.isOnHome ? './assets/home_filled.png' : './assets/home_outline.png';
     },
     getSearchIcon() {
-      if (this.$route.path === '/search') {
-        return './assets/search_bold.png';
-      }
-      return './assets/search.png';
+      return this.isOnBrowse ? './assets/search_bold.png' : './assets/search.png';
     },
     getBookmarkIcon() {
-      if (this.$route.path === '/bookmark') {
-        return './assets/bookmark_filled.png';
-      }
-      return './assets/bookmark_outline.png';
+      return this.isOnSaved ? './assets/bookmark_filled_dark.png' : './assets/bookmark_outline_dark.png';
     },
     getUserIcon() {
-      if (this.$route.path === '/profile') {
-        return './assets/user_filled.png';
-      }
-      return './assets/user_outline.png';
+      return this.isOnProfile ? './assets/user_filled.png' : './assets/user_outline.png';
     },
     getLoginIcon() {
-      if (this.$route.path === '/login') {
-        return './assets/login_filled.png';
-      }
-      return './assets/login_outline.png';
+      return this.isOnLogin ? './assets/login_filled.png' : './assets/login_outline.png';
+    }
+  },
+  computed: {
+    isOnHome() {
+      return this.$route.path === '/';
+    },
+    isOnBrowse() {
+      return this.$route.path === '/browse';
+    },
+    isOnSaved() {
+      return this.$route.path === '/saved';
+    },
+    isOnProfile() {
+      return this.$route.path === '/profile' || this.$route.path === '/follows' || this.$route.path === '/settings';
+    },
+    isOnLogin() {
+      return this.$route.path === '/login' || this.$route.path === '/register';
     }
   }
 }
@@ -104,13 +102,13 @@ export default {
 <style scoped>
 .sidebar {
   height: 100%;
-  width: 250px;
+  width: 280px;
   position: fixed;
   left: 50;
   top: 0;
-  padding-top: 40px;
-  border-right: solid #3B413C;
-  padding-left: 30px;
+  padding-top: 50px;
+  padding-left: 50px;
+  background-color: #DAF0EE;
 }
 
 .sidebar div {
@@ -122,6 +120,7 @@ export default {
   margin: 0 5px;
   font-weight: 600;
   letter-spacing: 1px;
+  color: #3B413C;
 }
 
 .top {
@@ -130,6 +129,7 @@ export default {
 
 img {
   height: 32px;
+  filter: invert(20%) sepia(13%) saturate(286%) hue-rotate(78deg) brightness(102%) contrast(88%);
 }
 
 .middle {
@@ -142,7 +142,7 @@ img {
   font-size: 24px;
   margin-bottom: 15px;
   text-decoration: none;
-  color: #9DB5B2;
+  color: #3B413C;
 }
 
 .selected {

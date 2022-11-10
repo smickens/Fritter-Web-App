@@ -24,7 +24,7 @@ class FollowCollection {
         dateCreated: date
     });
     await follow.save(); // Saves follow to MongoDB
-    return (await follow.populate('userId')).populate('friendId');
+    return (await (await follow.populate('userId')).populate('friendId')).populate('personaId');
   }
 
   /**
@@ -44,7 +44,7 @@ class FollowCollection {
         personaId: personaId
     });
     await follow.save(); // Saves follow to MongoDB
-    return (await follow.populate('userId')).populate('friendId');
+    return (await (await follow.populate('userId')).populate('friendId')).populate('personaId');
   }
 
   /**
@@ -58,6 +58,7 @@ class FollowCollection {
     return FollowModel.findOne({ userId, friendId })
             .populate('userId')
             .populate('friendId')
+            .populate('personaId')
             .exec();
   }
 
@@ -71,6 +72,7 @@ class FollowCollection {
     return FollowModel.find({ userId })
             .populate('userId')
             .populate('friendId')
+            .populate('personaId')
             .exec();
   }
 
@@ -84,6 +86,7 @@ class FollowCollection {
     return FollowModel.find({ friendId })
             .populate('userId')
             .populate('friendId')
+            .populate('personaId')
             .exec();
   }
 
@@ -97,6 +100,7 @@ class FollowCollection {
     return FollowModel.find({ personaId: personaId })
             .populate('userId')
             .populate('friendId')
+            .populate('personaId')
             .exec();
   }
 
@@ -110,14 +114,14 @@ class FollowCollection {
    */
    static async updateOne(userId: Types.ObjectId | string, friendId: Types.ObjectId | string, name?: string): Promise<HydratedDocument<Follow>> {
     const follow = await this.findOne(userId, friendId);
-    if (name !== undefined) {
+    if (name != null) {
       const persona = await PersonaCollection.findOneByName(userId, name);
       follow.personaId = persona._id;
     } else {
       follow.personaId = null;
     }
     await follow.save();
-    return (await follow.populate('userId')).populate('friendId');
+    return (await (await follow.populate('userId')).populate('friendId')).populate('personaId');
   }
 
   /**

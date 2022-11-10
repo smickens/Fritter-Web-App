@@ -75,8 +75,37 @@ const isValidPersonaName = async (req: Request, res: Response, next: NextFunctio
   next();
 };
 
+const isValidPersonaId = async (req: Request, res: Response, next: NextFunction) => {
+  const validFormat = Types.ObjectId.isValid(req.params.personaId);
+  const persona = validFormat ? await PersonaCollection.findOne(req.params.personaId) : '';
+
+  if (!persona) {
+    res.status(403).json({
+      error: `No persona with id, ${req.params.personaId}, exists for current user.`
+    });
+    return;
+  }
+
+  next();
+};
+
+const isSameActiveState = async (req: Request, res: Response, next: NextFunction) => {
+  const persona = await PersonaCollection.findOne(req.params.personaId);
+
+  if (persona.isActive == req.body.isActive) {
+    res.status(403).json({
+      error: `Persona with id, ${req.params.personaId}, is already ${persona.isActive ? 'active' : 'not active'}.`
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
     isValidPersonaName,
     isPersonaExists,
-    isPersona
+    isPersona,
+    isValidPersonaId,
+    isSameActiveState
 };

@@ -13,30 +13,17 @@
       <div class="follows-text">
         <p>{{ $store.state.followers.length }} Followers</p>
         <p>{{ $store.state.following.length }} Following</p>
-        <button @click="toggleShowingFollows()">{{ viewingFollows ? 'Hide' : 'View' }}</button>
+        <router-link to="/follows" custom v-slot="{ navigate }">
+          <button @click="navigate" role="link">View</button>
+        </router-link>
       </div>
     </section>
-    <div v-if="viewingFollows">
-      <FollowsPage />
-    </div>
-    <div v-else>
-      <section>
+
+    <section>
       <h3>My Personas</h3>
-      <!-- <section
-        v-if="$store.state.personas.length"
-      >
-        <FreetComponent
-          v-for="persona in $store.state.personas"
-          :key="persona.id"
-          :freet="freet"
-        />
-      </section>
-      <section
-        v-else
-      >
-        You haven't created any personas yet. Type below to create your first one!
-      </section> -->
+      <PersonasComponent />
     </section>
+
     <section>
       <h3>My Freets</h3>
       <section
@@ -48,13 +35,12 @@
           :freet="freet"
         />
       </section>
-      <section
+      <article
         v-else
       >
-        You haven't posted any freets yet. Go to the home page to post your first freet!
-      </section>
+        <p>You haven't posted any freets yet. Go to the home page to post your first freet!</p>
+      </article>
     </section>
-    </div>
   </main>
 </template>
 
@@ -64,6 +50,7 @@ import ChangePasswordForm from '@/components/Settings/ChangePasswordForm.vue';
 import DeleteAccountForm from '@/components/Settings/DeleteAccountForm.vue';
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import FollowsPage from '@/components/Profile/FollowsPage.vue';
+import PersonasComponent from '@/components/Profile/PersonasComponent.vue';
 
 export default {
   name: 'ProfilePage',
@@ -72,18 +59,13 @@ export default {
     ChangePasswordForm,
     DeleteAccountForm,
     FreetComponent,
-    FollowsPage
+    FollowsPage,
+    PersonasComponent
   },
   data() {
     return {
-      viewingFollows: false, // Whether or not this freet is in edit mode
       alerts: {}, // Displays success/error messages encountered during freet modification
     };
-  },
-  methods: {
-    toggleShowingFollows() {
-      this.viewingFollows = !this.viewingFollows;
-    }
   },
   computed: {
     ownFreets() {
@@ -95,6 +77,7 @@ export default {
   mounted() {
     this.$store.commit('refreshFollows');
     this.$store.commit('refreshFollowers');
+    this.$store.commit('refreshPersonas');
   }
 };
 </script>
@@ -111,11 +94,6 @@ header {
   justify-content: space-between;
 }
 
-header img {
-  width: 30px;
-  height: 30px;
-}
-
 .follows-text {
   display: flex;
   margin: 20px 0px;
@@ -125,5 +103,9 @@ header img {
   font-size: medium;
   padding-right: 10px;
   margin: 0px;
+}
+
+article p {
+  font-size: smaller;
 }
 </style>

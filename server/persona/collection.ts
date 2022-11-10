@@ -18,7 +18,8 @@ class PersonaCollection {
   static async addOne(userId: Types.ObjectId | string, name: string): Promise<HydratedDocument<Persona>> {
     const persona = new PersonaModel({
         userId: userId,
-        name: name
+        name: name,
+        isActive: true
     });
     await persona.save(); // Saves persona to MongoDB
     return persona.populate('follows');
@@ -52,6 +53,20 @@ class PersonaCollection {
    */
   static async findAllByUser(userId: Types.ObjectId | string): Promise<Array<HydratedDocument<Persona>>> {
     return PersonaModel.find({ userId: userId }).populate('follows');
+  }
+
+  /**
+   * Update a persona's active state
+   *
+   * @param {string} personaId - The id of the persona to find
+   * @param {boolean} isActive - If persona is active
+   * @return {Promise<HydratedDocument<Freet>>} - The newly updated follow
+   */
+   static async updateOne(personaId: Types.ObjectId | string, isActive: boolean): Promise<HydratedDocument<Persona>> {
+    const persona = await this.findOne(personaId);
+    persona.isActive = isActive;
+    await persona.save();
+    return persona.populate('follows');
   }
 
   /**

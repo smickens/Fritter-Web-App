@@ -11,9 +11,11 @@ export default {
       url: '/api/users/session',
       method: 'DELETE',
       setUsername: true,
-      title: 'Sign out',
+      title: '',
+      buttonText: 'Sign out',
       fields: [],
       content: 'Taking a break? See you later.',
+      confirmAlertMessage: 'Are you sure you want to sign out of Fritter?',
       callback: () => {
         this.$router.push({name: 'Home'}); // Goes to Home page after signing out
         this.$store.commit('alert', {

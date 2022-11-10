@@ -11,9 +11,11 @@ export default {
       url: '/api/users',
       method: 'DELETE',
       setUsername: true,
-      title: 'Delete account',
+      title: '',
       fields: [],
-      content: 'Deleting your account is permanent and irreversible. Proceed only if you understand these consequences.',
+      content: 'Delete Account',
+      confirmAlertMessage: 'Deleting your account is permanent and irreversible. Proceed only if you understand these consequence.',
+      buttonText: 'Delete',
       callback: () => {
         this.$router.push({name: 'Home'}); // Goes to Home page after deleting account
         this.$store.commit('alert', {

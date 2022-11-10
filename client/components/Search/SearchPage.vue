@@ -5,9 +5,28 @@
   <main>
     <header>
       <SearchBar 
-        titleText="Freets"
+        @searched="handleSearch" 
         placeholderText="Search by author..."
       />
+      <section
+        v-if="Object.keys(alerts).length"
+      >
+        <article
+          class="search-alerts"
+          v-for="(status, alert, index) in alerts"
+          :key="index"
+          :class="status"
+        >
+          <p>{{ alert }}</p>
+        </article>
+      </section>
+      <article
+        v-else
+        class="placeholder"
+      >
+        <!-- keeps spacing when there's no alert to display -->
+        <p>placeholder</p>
+      </article>
     </header>
     <section
       v-if="$store.state.freets.length"
@@ -21,7 +40,12 @@
     <article
       v-else
     >
-      <h3>No freets found.</h3>
+      <h3 v-if="searchAuthor != ''">
+        No freets found from author <span>{{ searchAuthor }}</span>
+      </h3>
+      <h3 v-else> 
+        No freets found
+      </h3>
     </article>
   </main>
 </template>
@@ -38,9 +62,75 @@ export default {
     SearchBar,
     GetFreetsForm
   },
+  data() {
+    return {
+      searchAuthor: '',
+      alerts: {}
+    };
+  },
+  methods: {
+    async handleSearch(value) {
+      // clear old alerts
+      this.alerts = {};
+
+      if (value.trim().length === 0) {
+        // cannot search for empty string
+        const e = ('status', 'empty_text_alert', 'Search text for author name cannot be empty');
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+        return;
+      }
+
+      this.searchAuthor = value;
+
+      this.$store.state.filter = this.searchAuthor;
+
+      const url = this.searchAuthor ? `/api/freets?author=${this.searchAuthor}` : '/api/freets';
+      try {
+        const r = await fetch(url);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+
+        this.$store.commit('updateFilter', this.searchAuthor);
+        this.$store.commit('updateFreets', res);
+      } catch (e) {
+        console.log(e)
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+      }
+    }
+  },
   mounted() {
     this.$store.state.filter = '';
     this.$store.commit('refreshFreets');
   }
 };
 </script>
+
+<style scoped>
+.search-alerts {
+  color: red;
+  font-size: small;
+}
+
+.search-alerts p {
+  margin: 8px 0px 10px 20px; /* top, right, bottom, left */
+}
+
+.placeholder p {
+  opacity: 0;
+  font-size: small;
+  margin: 8px 0px 10px 20px; /* top, right, bottom, left */
+}
+
+h3 {
+  text-align: center;
+}
+
+h3 span {
+  color: #9DB5B2;
+  font-weight: 500;
+}
+</style>

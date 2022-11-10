@@ -104,11 +104,25 @@ const isValidFriend = async (req: Request, res: Response, next: NextFunction) =>
   next();
 };
 
+const hasPersona = async (req: Request, res: Response, next: NextFunction) => {
+  const validFormat = Types.ObjectId.isValid(req.params.friendId);
+  const followPersonaId = validFormat ? (await FollowCollection.findOne(req.session.userId, req.params.friendId)).personaId : '';
+  if (!followPersonaId) {
+    res.status(404).json({
+      error: `The follow for friend with id, ${req.params.friendId}, does not have a persona to remove.`
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   canNotFollow,
   canFollow,
   isValidAccount,
   isPersonaExists,
   isFriendExists,
-  isValidFriend
+  isValidFriend,
+  hasPersona
 };

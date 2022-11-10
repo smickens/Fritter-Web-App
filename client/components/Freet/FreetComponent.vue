@@ -9,9 +9,9 @@
       <div class="freet-header">
         <div class="freet-header-left">
           <h3 class="author">
-            @{{ freet.author }}
+            @{{ freetAuthorUsername }}
           </h3>
-          <div v-if="$store.state.username && freet.author !== $store.state.username">
+          <div v-if="$store.state.username && freetAuthorUsername !== $store.state.username">
             <button
               v-if="isFollowed"
               @click="removeFollow"
@@ -76,12 +76,12 @@
           <img src="../../public/assets/heart_outline.png" alt="">
         </button>
         <p>
-          {{ freet.likedBy.length }} {{ freet.likedBy.length == 1 ? 'Like' : 'Likes' }}
-          {{ freet.likedBy.length == 0 ? '' : 'by (' + freet.likedBy.join(', ') + ')' }} 
+          {{ freetLikedBy.length }} {{ freetLikedBy.length == 1 ? 'Like' : 'Likes' }}
+          {{ freetLikedBy.length == 0 ? '' : 'by (' + freetLikedBy.join(', ') + ')' }} 
         </p>
       </div>
       <div
-        v-if="$store.state.username === freet.author"
+        v-if="$store.state.username === freetAuthorUsername"
         class="actions"
       >
         <button
@@ -107,14 +107,14 @@
         </button>
       </div>
     </div>
-    <div v-if="isBookmarked">
+    <div v-if="$store.state.username && isBookmarked">
       <TagsComponent 
         :bookmark="bookmarkForFreetId(freet._id)"
       />
     </div>
     <div>
       <p class="info">
-        Posted at {{ freet.dateModified }}
+        {{ freet.dateModified != freet.dateCreated ? 'Modifed' : 'Posted' }} at {{ freetDate }}
         <i v-if="freet.edited">(edited)</i>
       </p>
     </div>
@@ -132,6 +132,7 @@
 
 <script>
 import TagsComponent from '@/components/Bookmark/TagsComponent.vue';
+import { stringify } from 'uuid';
 
 export default {
   name: 'FreetComponent',
@@ -144,10 +145,21 @@ export default {
       type: Object,
       required: true
     },
+    isSavedFreet: {
+      default: false,
+      type: Boolean
+    },
+    savedDate: {
+      default: null,
+      type: String
+    }
   },
   data() {
     return {
       editing: false, // Whether or not this freet is in edit mode
+      liking: false,
+      bookmarking: false,
+      following: false,
       draft: this.freet.content, // Potentially-new content for this freet
       alerts: {}, // Displays success/error messages encountered during freet modification
     };
@@ -192,13 +204,16 @@ export default {
         message: 'Successfully liked freet!',
         body: JSON.stringify({freetId: this.freet._id}),
         callback: () => {
+          this.liking = false;
           this.$store.commit('refreshFreets');
-
-          this.$set(this.alerts, params.message, 'success');
-          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`likes/`, params);
+
+      // If already liking/unliking ignore, once that has finished then accept new requests to like/unlike
+      if (!this.liking) {
+        this.request(`likes/`, params);
+        this.liking = true;
+      }
     },
     unlikeFreet() {
       /**
@@ -208,13 +223,16 @@ export default {
         method: 'DELETE',
         message: 'Successfully unliked freet!',
         callback: () => {
+          this.liking = false;
           this.$store.commit('refreshFreets');
-
-          this.$set(this.alerts, params.message, 'success');
-          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`likes/${this.freet._id}`, params);
+
+      // If already liking/unliking ignore, once that has finished then accept new requests to like/unlike
+      if (!this.liking) {
+        this.request(`likes/${this.freet._id}`, params);
+        this.liking = true;
+      }
     },
     addFollow() {
       /**
@@ -225,13 +243,19 @@ export default {
         message: 'Successfully followed!',
         body: JSON.stringify({friendId: this.freet.authorId}),
         callback: () => {
+          this.following = false;
           this.$store.commit('refreshFollows');
 
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`follows/`, params);
+
+      // If already following/unfollowing ignore, once that has finished then accept new requests follow/unfollow
+      if (!this.following) {
+        this.request(`follows/`, params);
+        this.following = true;
+      }
     },
     removeFollow() {
       /**
@@ -241,13 +265,19 @@ export default {
         method: 'DELETE',
         message: 'Successfully unfollowed!',
         callback: () => {
+          this.following = false;
           this.$store.commit('refreshFollows');
 
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`follows/${this.freet.authorId}`, params);
+      
+      // If already following/unfollowing ignore, once that has finished then accept new requests follow/unfollow
+      if (!this.following) {
+        this.request(`follows/${this.freet.authorId}`, params);
+        this.following = true;
+      }
     },
     addBookmark() {
       /**
@@ -258,13 +288,19 @@ export default {
         message: 'Successfully bookmarked freet!',
         body: JSON.stringify({freetId: this.freet._id}),
         callback: () => {
+          this.bookmarking = false;
           this.$store.commit('refreshBookmarks');
 
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`bookmarks/`, params);
+      
+      // If already bookmarking/unbookmarking ignore, once that has finished then accept new requests bookmark/unbookmark
+      if (!this.bookmarking) {
+        this.request(`bookmarks/`, params);
+        this.bookmarking = true;
+      }
     },
     removeBookmark() {
       /**
@@ -274,13 +310,19 @@ export default {
         method: 'DELETE',
         message: 'Successfully removed bookmark!',
         callback: () => {
+          this.bookmarking = false;
           this.$store.commit('refreshBookmarks');
 
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
         }
       };
-      this.request(`bookmarks/${this.freet._id}`, params);
+      
+      // If already bookmarking/unbookmarking ignore, once that has finished then accept new requests bookmark/unbookmark
+      if (!this.bookmarking) {
+        this.request(`bookmarks/${this.freet._id}`, params);
+        this.bookmarking = true;
+      }
     },
     submitEdit() {
       /**
@@ -330,24 +372,44 @@ export default {
 
         params.callback();
       } catch (e) {
+        this.liking = false;
+        this.following = false;
+        this.bookmarking = false;
+        
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
     },
     bookmarkForFreetId(freetId) {
       return this.$store.state.bookmarks.find(bookmark => bookmark.freetId._id === freetId)
+    },
+    convertDate(date) {
+      var d = new Date(date);
+      return d.toLocaleString();
     }
   },
   computed: {
     isLiked() {
-      return this.freet.likedBy.includes(this.$store.state.username);
+      return this.freetLikedBy.includes(this.$store.state.username);
     },
     isFollowed() {
       const friendNames = this.$store.state.following.map(follow => { return follow.friendUsername });
-      return friendNames.includes(this.freet.author);
+      return friendNames.includes(this.freetAuthorUsername);
     },
     isBookmarked() {
       return this.$store.getters.bookmarkFreetIds.includes(this.freet._id);
+    },
+    freetAuthorUsername() {
+      return this.isSavedFreet ? this.freet.authorId.username : this.freet.author;
+    },
+    freetLikedBy() {
+      return this.isSavedFreet ? this.freet.likedBy.map(like => { return like.userId.username }) : this.freet.likedBy;
+    },
+    freetDate() {
+      if (!this.isSavedFreet) {
+        return this.freet.dateModified;
+      }
+      return this.convertDate(this.freet.dateModified);
     }
   }
 };
@@ -380,6 +442,10 @@ export default {
 .icon-btn {
   border: none;
   background-color: transparent;
+}
+
+.icon-btn img {
+  height: 24px;
 }
 
 .info {

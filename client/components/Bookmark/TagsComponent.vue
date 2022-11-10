@@ -18,8 +18,8 @@
               :value="newTag"
               @input="newTag = $event.target.value"
         >
-        <button @click="addTag()">Save</button>
-        <button @click="stopAddingTag()">Cancel</button>
+        <button @click="addTag()">&#x2713;</button>
+        <button @click="stopAddingTag()">&#x2715;</button>
       </div>
       <button v-else @click="startAddingTag">+ tag</button>
     </div>
@@ -55,7 +55,6 @@ export default {
       /**
        * Add tag to bookmark
        */
-      console.log("add tag w/ name: " + this.newTag);
       const params = {
         method: 'POST',
         message: 'Successfully added tag!',
@@ -75,7 +74,6 @@ export default {
       /**
        * Remove tag from bookmark
        */
-      console.log(tag);
       const params = {
         method: 'DELETE',
         message: 'Successfully removed tag!',

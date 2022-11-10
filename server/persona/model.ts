@@ -12,6 +12,7 @@ export type Persona = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   userId: Types.ObjectId;
   name: string;
+  isActive: boolean;
   follows?: Array<Follow>;
 };
 
@@ -28,6 +29,10 @@ const PersonaSchema = new Schema<Persona>({
   // name of persona
   name: {
     type: String,
+    required: true
+  },
+  isActive: {
+    type: Boolean,
     required: true
   }
 }, {

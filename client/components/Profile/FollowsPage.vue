@@ -2,41 +2,86 @@
 <!-- User should be authenticated in order to see this page -->
 
 <template>
-  <div class="two-column">
-    <section class="column">
-      <h3>Followers</h3>
-      <div
-        v-for="follow in $store.state.followers"
-        :key="follow.id"
-        :freet="follow"
-      >
-        <p>@{{follow.username}}</p>
+  <main>
+    <section>
+      <header>
+        <h2 class="title">@{{ $store.state.username }}</h2>
+      </header>
+      <div class="follows-text">
+        <p>{{ $store.state.followers.length }} Followers</p>
+        <p>{{ $store.state.following.length }} Following</p>
+        <router-link to="/profile" custom v-slot="{ navigate }">
+          <button @click="navigate" role="link">Hide</button>
+        </router-link>
       </div>
     </section>
-    <section class="column">
-      <h3>Following</h3>
-      <div
-        v-for="follow in $store.state.following"
-        :key="follow.id"
-        :freet="follow"
-      >
-        <p>@{{follow.friendUsername}}</p>
-        <button @click="removeFollow(follow)">x</button>
-      </div>
-    </section>
-  </div>
+    <div>
+      <section>
+        <div class="two-column">
+          <section class="column">
+            <h3>Followers</h3>
+            <div
+              v-for="follow in $store.state.followers"
+              :key="follow.id"
+            >
+              <p>@{{follow.username}}</p>
+            </div>
+          </section>
+          <section class="column">
+            <h3>Following</h3>
+            <FollowComponent
+              v-for="follow in $store.state.following"
+              :key="follow.id"
+              :follow="follow"
+              :isFollower=false
+            />
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
 </template>
 
 <script>
+import FollowComponent from '@/components/Profile/FollowComponent.vue';
 
 export default {
   name: 'FollowsPage',
+  components: {
+    FollowComponent
+  },
   data() {
     return {
+      editingPersona: false,
       alerts: {}, // Displays success/error messages encountered during freet modification
     };
   },
   methods: {
+    startEditingPersona() {
+      this.editingPersona = true;
+    },
+    stopEditingPersona() {
+      this.editingPersona = false;
+    },
+    editPersona(follow, personaName) {
+      console.log("update follow's persona id")
+      // follow.personaId =   
+
+      const params = {
+        method: 'PATCH',
+        message: 'Successfully edited follow\'s persona!',
+        body: JSON.stringify({name: personaName}),
+        callback: () => {
+          stopEditingPersona();
+          this.$store.commit('refreshFollows');
+
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(`follows/${follow.friendId}`, params);
+
+    },
     removeFollow(follow) {
       /**
        * Remove follow
@@ -85,6 +130,28 @@ export default {
 </script>
 
 <style scoped>
+.title {
+  font-weight: 400;
+  margin: 0px;
+}
+
+header {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.follows-text {
+  display: flex;
+  margin: 20px 0px;
+}
+
+.follows-text p {
+  font-size: medium;
+  padding-right: 10px;
+  margin: 0px;
+}
+
 .two-column {
   display: flex;
   justify-content: space-evenly;
@@ -98,11 +165,6 @@ export default {
   flex: 1;
 }
 
-.column p {
-  margin: 0px;
-  padding-right: 15px;
-}
-
 .column div {
   display: flex;
   justify-content: space-between;
@@ -111,5 +173,11 @@ export default {
   padding: 5px 10px;
   border-radius: 10px ;
   margin-right: 20px;
+  align-items: center;
+}
+
+.column div p {
+  margin: 5px 0px;
+  padding-right: 15px;
 }
 </style>
